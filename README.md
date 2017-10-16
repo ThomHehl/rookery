@@ -1,2 +1,3 @@
 # rookery
-Animate text for videos
+Allow the user to quickly animate texts for video production.
+
