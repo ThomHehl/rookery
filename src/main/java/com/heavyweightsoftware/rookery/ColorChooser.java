@@ -8,13 +8,33 @@ public class ColorChooser extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private JColorChooser colorChooser;
+    private JPanel panelMain;
 
-    public ColorChooser() {
+    private JColorChooser colorChooser;
+    private OnColorChosen onColorChosen;
+
+    public ColorChooser(Color color, OnColorChosen onColorChosen) {
+        this.onColorChosen = onColorChosen;
+
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
+        setupButtons();
+        setupColorChooser(color);
+    }
+
+    private void setupColorChooser(Color color) {
+        colorChooser = new JColorChooser(color);
+        new Thread() {
+            @Override
+            public void run() {
+                panelMain.add(colorChooser);
+            }
+        }.start();
+    }
+
+    private void setupButtons() {
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onOK();
@@ -26,10 +46,6 @@ public class ColorChooser extends JDialog {
                 onCancel();
             }
         });
-
-        //setup color chooser
-        colorChooser = new JColorChooser(Color.BLACK);
-        contentPane.add(colorChooser, BorderLayout.PAGE_END);
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -48,7 +64,7 @@ public class ColorChooser extends JDialog {
     }
 
     private void onOK() {
-        // add your code here
+        onColorChosen.colorChosen(colorChooser.getColor());
         dispose();
     }
 
@@ -57,10 +73,7 @@ public class ColorChooser extends JDialog {
         dispose();
     }
 
-    public static void main(String[] args) {
-        ColorChooser dialog = new ColorChooser();
-        dialog.pack();
-        dialog.setVisible(true);
-        System.exit(0);
+    public abstract static class OnColorChosen {
+        public abstract void colorChosen(Color color);
     }
 }
