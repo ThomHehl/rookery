@@ -1,7 +1,7 @@
 package com.heavyweightsoftware.rookery;
 
 public enum AnimationType {
-    FlyInBottm,
+    FlyInBottom,
     FlyInLeft,
     FlyInRight,
     FlyInTop,

@@ -51,8 +51,10 @@ public class CollectData {
     public CollectData() {
         super();
 
+        setupAnimationTypes();
         setupFontLists();
         setupNumberFilters();
+
         createButtonListeners();
         createColorListeners();
     }
@@ -102,27 +104,76 @@ public class CollectData {
     private WordDisplay buildDisplayWords() {
         WordDisplay wordDisplay = new WordDisplay();
 
-        String delay = textDelay.getText().trim();
-        int val = Integer.parseInt(delay);
-        wordDisplay.setAnimationSpeed(val);
+        setAnimationProperties(wordDisplay);
+        setTextProperties(wordDisplay);
+        setTitleProperties(wordDisplay);
 
         return wordDisplay;
     }
 
+    public void setAnimationProperties(WordDisplay wordDisplay) {
+        String animString = comboAnimation.getSelectedItem().toString();
+        AnimationType animationType = AnimationType.valueOf(animString);
+        wordDisplay.setAnimationType(animationType);
+
+        String delay = textDelay.getText().trim();
+        int val = Integer.parseInt(delay);
+        wordDisplay.setAnimationSpeed(val);
+    }
+
+    public void setTextProperties(WordDisplay wordDisplay) {
+        wordDisplay.setText(textAreaText.getText());
+        wordDisplay.setTextBackground(lblTextBackgroundDemo.getForeground());
+        wordDisplay.setTextFontName(comboTextFont.getSelectedItem().toString());
+        wordDisplay.setTextFontSize(Integer.parseInt(comboTextSize.getSelectedItem().toString()));
+        wordDisplay.setTextForeground(lblTextColorDemo.getForeground());
+    }
+
+    public void setTitleProperties(WordDisplay wordDisplay) {
+        wordDisplay.setTitle(textTitle.getText());
+        wordDisplay.setTitleBackground(lblTitleBackgroundDemo.getForeground());
+        wordDisplay.setTitleFontName(comboTitleFont.getSelectedItem().toString());
+        wordDisplay.setTitleFontSize(Integer.parseInt(comboTitleSize.getSelectedItem().toString()));
+        wordDisplay.setTitleForeground(lblTitleColorDemo.getForeground());
+    }
+
     private void displayButtonPressed() {
+        WordDisplay wordDisplay = buildDisplayWords();
+
+        JFrame frame = new JFrame(DisplayWords.class.getSimpleName());
+        frame.setContentPane(new DisplayWords(wordDisplay).panelMain);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
+        frame.pack();
+        frame.setVisible(true);
     }
 
     private void loadButtonPressed() {
     }
 
     private void saveButtonPressed() {
+        WordDisplay wordDisplay = buildDisplayWords();
+    }
+
+    private void setupAnimationTypes() {
+        for(AnimationType animType : AnimationType.values()) {
+            String str = animType.toString();
+            comboAnimation.addItem(str);
+        }
+        comboAnimation.setSelectedIndex(0);
     }
 
     private void setupFontLists() {
         //initialize the font lists
         for(String fontName : getFontList()) {
-            comboTitleFont.addItem(fontName);
             comboTextFont.addItem(fontName);
+            comboTitleFont.addItem(fontName);
+        }
+
+        for(int ix = 10; ix <65; ix += 2) {
+            String str = Integer.toString(ix);
+            comboTextSize.addItem(str);
+            comboTitleSize.addItem(str);
         }
     }
 
