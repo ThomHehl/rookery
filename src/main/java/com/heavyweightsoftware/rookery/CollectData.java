@@ -1,12 +1,18 @@
 package com.heavyweightsoftware.rookery;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 
 public class CollectData {
     private static final String     NAME_TEXT_COLOR = "textColor";
@@ -44,6 +50,12 @@ public class CollectData {
     private JComboBox comboAnimation;
     private JTextField textDelay;
     private JButton buttonLoad;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    {
+        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+    }
 
     /**
      *
@@ -149,10 +161,50 @@ public class CollectData {
     }
 
     private void loadButtonPressed() {
+        final JFileChooser chooser = new JFileChooser();
+
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                "Rookery files", "rky");
+        chooser.setFileFilter(filter);
+
+        int returnVal = chooser.showOpenDialog(null);
+
+        if(returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+
+            WordDisplay wordDisplay;
+            try {
+                wordDisplay = objectMapper.readValue(file, WordDisplay.class);
+            } catch (IOException ioe) {
+                throw new RuntimeException("Error reading from file:" + file.getAbsolutePath(), ioe);
+            }
+
+            displayWordDisplay(wordDisplay);
+        }
     }
 
     private void saveButtonPressed() {
-        WordDisplay wordDisplay = buildDisplayWords();
+        final JFileChooser chooser = new JFileChooser();
+
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                "Rookery files", "rky");
+        chooser.setFileFilter(filter);
+
+        int returnVal = chooser.showOpenDialog(null);
+
+        if(returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            if(!file.getAbsolutePath().toLowerCase().endsWith(".rky")) {
+                file = new File(file.getAbsolutePath() + ".rky");
+            }
+
+            WordDisplay wordDisplay = buildDisplayWords();
+            try {
+                objectMapper.writeValue(file, wordDisplay);
+            } catch (IOException ioe) {
+                throw new RuntimeException("Error writing to file:" + file.getAbsolutePath(), ioe);
+            }
+        }
     }
 
     private void setupAnimationTypes() {
@@ -232,6 +284,23 @@ public class CollectData {
             default:
                 throw new IllegalArgumentException(labelName);
         }
+    }
+
+    private void displayWordDisplay(WordDisplay wordDisplay) {
+        comboAnimation.setSelectedItem(wordDisplay.getAnimationType().toString());
+        textDelay.setText(Integer.toString(wordDisplay.getAnimationSpeed()));
+
+        textAreaText.setText(wordDisplay.getText());
+        lblTextBackgroundDemo.setForeground(wordDisplay.getTextBackground());
+        comboTextFont.setSelectedItem(wordDisplay.getTextFontName());
+        comboTextSize.setSelectedItem(Integer.toString(wordDisplay.getTextFontSize()));
+        lblTextColorDemo.setForeground(wordDisplay.getTextForeground());
+
+        textTitle.setText(wordDisplay.getTitle());
+        lblTitleBackgroundDemo.setForeground(wordDisplay.getTitleBackground());
+        comboTitleFont.setSelectedItem(wordDisplay.getTitleFontName());
+        comboTitleSize.setSelectedItem(Integer.toString(wordDisplay.getTitleFontSize()));
+        lblTitleColorDemo.setForeground(wordDisplay.getTitleForeground());
     }
 
     protected static synchronized String[] getFontList() {
