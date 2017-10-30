@@ -158,6 +158,7 @@ public class CollectData {
         frame.setContentPane(new DisplayWords(wordDisplay).panelMain);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setExtendedState(Frame.MAXIMIZED_BOTH);
+        frame.setUndecorated(true);
         frame.pack();
         frame.setVisible(true);
     }
