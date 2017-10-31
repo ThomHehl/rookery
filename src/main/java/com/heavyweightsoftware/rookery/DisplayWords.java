@@ -2,19 +2,20 @@ package com.heavyweightsoftware.rookery;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.intellij.uiDesigner.core.Spacer;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
 
 public class DisplayWords {
     private JLabel lblTitle;
-    private JTextArea textArea;
+    private JFrame mainFrame;
     protected JPanel panelMain;
     private JPanel panelText;
+    private JTextArea textArea;
 
     private WordDisplay wordDisplay;
 
@@ -35,6 +36,21 @@ public class DisplayWords {
         setupClose();
     }
 
+    private JFrame getMainFrame() {
+        if (mainFrame == null) {
+            Component comp = panelMain.getParent();
+            while (!(comp instanceof JFrame)) {
+                comp = comp.getParent();
+            }
+
+            mainFrame = (JFrame) comp;
+
+            setupInvisibleCursor();
+        }
+
+        return mainFrame;
+    }
+
     private void setupClose() {
         KeyAdapter keyAdapter = new KeyAdapter() {
             @Override
@@ -48,13 +64,15 @@ public class DisplayWords {
     }
 
     private void closeJframe() {
-        Component comp = panelMain.getParent();
-        while (!(comp instanceof JFrame)) {
-            comp = comp.getParent();
-        }
+        getMainFrame().dispose();
+    }
 
-        JFrame mainFrame = (JFrame) comp;
-        mainFrame.dispose();
+    private void setupInvisibleCursor() {
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        Point hotSpot = new Point(0, 0);
+        BufferedImage cursorImage = new BufferedImage(1, 1, BufferedImage.TRANSLUCENT);
+        Cursor invisibleCursor = toolkit.createCustomCursor(cursorImage, hotSpot, "InvisibleCursor");
+        mainFrame.setCursor(invisibleCursor);
     }
 
     private void setupText() {
